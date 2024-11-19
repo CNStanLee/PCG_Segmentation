@@ -7,9 +7,12 @@ function signal_filtered = pcg_bandpass(signal, fs, f1, f2, order)
 signal_filtered = filter(b, a, signal);
 
 
+time = linspace(0, 10, length(signal_filtered));
+
+
 % plot the filtered signal
 figure;
-plot(signal_filtered);
+plot(time, signal_filtered);
 xlabel('Time (s)');
 ylabel('Amplitude');
 title('Filtered PCG Signal');

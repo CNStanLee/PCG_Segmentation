@@ -25,9 +25,13 @@ addpath('data/cinc2016');
 % take first 10s of the signal
 signal = signal(1:10*fs);
 
+% convert x-axis to time(s)
+time = linspace(0, 10, length(signal));
+
+
 % plot the signal
 figure;
-plot(signal);
+plot(time, signal);
 xlabel('Time (s)');
 ylabel('Amplitude');
 title('PCG Signal');
@@ -118,3 +122,48 @@ PCG = signal_filtered;
 %     [assigned_states] = runSpringerSegmentationAlgorithm(test_recordings{PCGi}, fs, B_matrix, pi_vector, total_obs_distribution, true);
 % end
 
+% -------------------------------------------------------------------------
+% 4 feature extraction
+% -------------------------------------------------------------------------
+
+% STFT
+figure;
+window = hamming(256); % 窗口大小为 256
+overlap = 128; % 重叠大小为 128
+nfft = 512; % FFT 点数
+spectrogram(PCG, window, overlap, nfft, fs, 'yaxis');
+title('STFT (Spectrogram)');
+colorbar;
+
+% MFCC
+% plot MFCC with 12 coefficients
+% x is time, y is coefficient index
+figure;
+numCoeffs = 12;
+coeffs = mfcc(PCG, fs, 'NumCoeffs', numCoeffs, 'LogEnergy', 'Replace');
+% convert frame index to time
+time_mfcc = linspace(0, 10, size(coeffs, 2));
+%imagesc(1:numCoeffs, time_mfcc, coeffs);
+imagesc(time_mfcc, 1:numCoeffs, coeffs');
+axis xy;
+colormap parula;
+title('MFCC');
+xlabel('Time (s)');
+ylabel('Coefficient Index');
+
+% Cochleogram
+fRange = [20, 400];
+x=PCG;
+Fs=fs;
+time = (length(x)-1)/Fs;
+gf = gammatoneFast(x, 64, fRange, fs);%Construct the cochleagram use Gammatone filterbank
+cg = cochleagram(gf, 200);%Construct the cochleagram
+
+figure;
+imagesc(linspace(0,time,size(cg,2)),linspace(fRange(1),fRange(2),size(cg,1)),cg);
+axis xy;
+colormap parula;
+title('Cochleogram');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+colorbar;
